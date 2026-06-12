@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>RULYROCKOLAS</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        header { padding: 10px 15px; background:#111; display:flex; justify-content:center; align-items: center; gap:10px; border-bottom:2px solid #333; position: relative; z-index: 20; }
+        #search-box { flex: 1; max-width: 500px; padding: 12px 15px; border-radius: 10px; border: 2px solid #0ff; background: #000; color: #fff; font-size: 16px; outline: none; }
+        header button { padding: 10px 15px; background: #111; border: 2px solid #0ff; color: #fff; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        #main-ui { display: flex; flex: 1; padding: 12px; gap: 15px; height: calc(100vh - 70px); position: relative; }
+        #left-panel { width: 155px; display: flex; flex-direction: column; gap: 10px; border-right: 2px solid #333; padding-right: 8px; padding-top: 0; z-index: 10; }
+
+    .logo-rocola { 
+    font-size: 18px; 
+    text-align: center; 
+    color: #fff; /* El centro de la letra en blanco ayuda a que el neón se vea más real */
+    font-weight: bold; 
+    margin: 3px 0; 
+    /* Efecto neón rojo multicapa */
+    text-shadow: 0 0 5px #f00, 
+                 0 0 10px #f00, 
+                 0 0 20px #f00, 
+                 0 0 40px #f00, 
+                 0 0 80px #f00; 
+    animation: brilloLogo 1s infinite alternate;
+}
+
+@keyframes brilloLogo { 
+    from { text-shadow: 0 0 5px #f00, 0 0 10px #f00, 0 0 20px #f00; } 
+    to { text-shadow: 0 0 10px #f00, 0 0 20px #f00, 0 0 40px #f00; } 
+}
+
+.logo-sub { 
+    font-size: 10px; /* Bajamos de 13px a 10px */
+    text-align: center; 
+    color: #88eeff; 
+    font-family: 'Brush Script MT', cursive; 
+    margin-bottom: 10px; /* Reducimos este margen para acercar el logo a los botones */
+    animation: brilloSub 1s infinite alternate; 
+}
+
+        .btn-cat { padding: 9px; border: 2px solid #333; border-radius: 8px; font-weight: bold; cursor: pointer; text-align: center; transition: 0.3s; background: #111; font-size: 0.85em; }
+        .btn-cat:hover { background: #0088ff; border-color: #0ff; color: #000; }
+        .btn-cat.activo { background: #0ff; border-color: #00eeff; color: #000; box-shadow: 0 0 10px #0ff, 0 0 20px #00bbff; }
+
+        #control-panel { margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: auto auto auto; gap: 6px; padding: 4px; }
+        .key { padding: 8px 4px; background: linear-gradient(180deg, #0a0a0a, #1a1a1a); border: 2px solid #0ff; color: #fff; border-radius: 8px; cursor: pointer; font-size: 0.8em; font-weight: bold; box-shadow: 0 0 4px rgba(0,255,255,0.2); transition: 0.2s; min-height: 38px; }
+        .key:hover { box-shadow: 0 0 8px rgba(0,255,255,0.4); transform: scale(1.03); }
+        .col-izq { grid-column: 1 / 2; }
+        .col-centro { grid-column: 2 / 3; }
+        .col-der { grid-column: 3 / 4; }
+
+        #creditos-box { margin-top: 12px; text-align: center; background: #1a1a1a; border: 2px solid #ff0; border-radius: 8px; padding: 7px 5px; box-shadow: 0 0 8px rgba(255,255,0.25); }
+        #creditos-txt { font-size: 0.8em; color: #ff0; font-weight: bold; margin-bottom: 2px; }
+        #creditos-val { font-size: 1.3em; color: #ff0; font-weight: bold; }
+        #modo-actual { font-size:0.7em; color:#ccc; margin-top:3px; }
+
+        /* ✅ Recuadros centrales recorridos a la derecha */
+        #center-panel { flex: 3; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr); gap: 16px; padding: 6px; margin-left: 5px; }
+        .grid-item { border: 3px solid transparent; border-radius: 10px; background: #111; cursor: pointer; position: relative; overflow: hidden; min-height: 145px; transition: 0.2s; }
+        .grid-item.seleccionado { border-color: #f00; box-shadow: 0 0 12px #f00, 0 0 24px #f00; animation: destelloMarco 0.8s infinite alternate; }
+        @keyframes destelloMarco { from { box-shadow: 0 0 10px #f00, 0 0 20px #f00; } to { box-shadow: 0 0 18px #f00, 0 0 35px #f00; } }
+        .grid-item img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* ✅ Panel derecho reducido para mejor estética */
+        #right-panel { width: 290px; display: flex; flex-direction: column; gap: 12px; }
+        #video-container { width: 100%; height: 200px; border: 2px solid #f0f; background: #000; border-radius: 10px; overflow: hidden; transition: all 0.3s ease; position: relative; z-index: 10; cursor: default !important; pointer-events: auto !important; }
+        #video-container.kiosk-mode { position: fixed; top: 0; left: 0; width: 100vw !important; height: 100vh !important; z-index: 9999; border: none; border-radius: 0; cursor: default !important; }
+        #lista-espera { flex: 1; border: 2px solid #f0f; border-radius: 10px; padding: 10px; background: #111; overflow-y: auto; }
+        #lista-items li { display:flex; align-items:center; gap:8px; padding:8px; margin:4px 0; background:#222; border-radius:5px; border-left:3px solid #0ff; cursor:pointer; font-size:0.9em; }
+        #lista-items li img { width:40px; height:40px; object-fit:cover; border-radius:4px; }
+
+        .modal { display: none; position: fixed; top:0; left:0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 99999; justify-content: center; align-items: center; }
+        .modal-contenido { background:#111; padding:25px; border: 2px solid #0ff; border-radius: 12px; text-align: center; box-shadow: 0 0 20px rgba(0,255,255,0.3); max-width: 420px; width: 90%; }
+        .fila-mapeo { display:flex; justify-content: space-between; align-items:center; margin:8px 0; font-size:0.85em; }
+        .fila-mapeo span + span, .fila-mapeo input, .fila-mapeo select { padding:4px 8px; background:#222; border:1px solid #f0f; border-radius:4px; color:#fff; min-width:70px; text-align:center; }
+
+        #teclado-virtual { display: none; position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); background: #111; border: 2px solid #0ff; border-radius: 12px; padding: 10px; z-index: 99998; box-shadow: 0 0 15px rgba(0,255,255,0.2); }
+        .fila-teclado { display: flex; gap: 5px; margin: 4px 0; justify-content: center; }
+        .tecla-v { padding: 8px 12px; background: #222; border: 1px solid #0ff; border-radius: 6px; color: #fff; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .tecla-v.selec { background:#0ff; color:#000; box-shadow: 0 0 10px #0ff; }
+        .tecla-v:hover { background: #0ff; color: #000; }
+
+        ::-webkit-scrollbar {width:8px;} ::-webkit-scrollbar-track {background:#111;} ::-webkit-scrollbar-thumb {background:#f0f;border-radius:4px;}
+    /* Estilos para los botones de la izquierda */
+        .key-ultra-small { 
+            width: 40px !important; 
+            padding: 2px 1px !important; 
+            font-size: 0.5em !important; 
+            height: 25px !important; 
+        }
+
+        /* Estilos para los botones del centro y derecha */
+        .key-small { 
+            padding: 5px 2px !important; 
+            font-size: 0.7em !important; 
+            height: 30px !important; 
+        }</style>
+</head>
+<body>
+    <header>
+        <input type="text" id="search-box" placeholder="Buscar...">
+        <button onclick="iniciarVoz()">🎤</button>
+        <button onclick="realizarBusqueda()">BUSCAR</button>
+        <button onclick="abrirModal('modal-config')">⚙️</button>
+        <button onclick="abrirModal('modal-teclas')">⌨️</button>
+        <button onclick="toggleTeclado()">⌨️+</button>
+    </header>
+
+    <div id="main-ui">
+        <div id="left-panel">
+            <div class="logo-rocola">RULYROCKOLAS</div>
+            <div class="logo-sub">MASTER 2.0</div>
+
+            <div class="btn-cat" id="cat-musica" onclick="cambiarCategoria('Música')">MÚSICA</div>
+            <div class="btn-cat" id="cat-karaoke" onclick="cambiarCategoria('Karaoke')">KARAOKE</div>
+            <div class="btn-cat" id="cat-videos" onclick="cambiarCategoria('Videos')">VIDEOS</div>
+            <div class="btn-cat" id="cat-local" onclick="cambiarCategoria('Local')">LOCAL</div>
+
+         <div id="control-panel">
+    <button class="key key-ultra-small col-izq" onclick="comando('PAUSA')">PAUSA</button>
+    <button class="key key-small col-centro" onclick="comando('ARRIBA')">▲</button>
+    <button class="key key-small col-der" onclick="comando('VOL+')">VOL+</button>
+
+    <button class="key key-ultra-small col-izq" onclick="comando('IZQUIERDA')">◀</button>
+    <button class="key key-small col-centro" onclick="comando('ACEPTAR')">OK</button>
+    <button class="key key-small col-der" onclick="comando('DERECHA')">▶</button>
+
+    <button class="key key-ultra-small col-izq" onclick="comando('CANCELAR')">CANCELAR</button>
+    <button class="key key-small col-centro" onclick="comando('ABAJO')">▼</button>
+    <button class="key key-small col-der" onclick="comando('VOL-')">VOL-</button>
+</div>
+            <div id="creditos-box">
+                <div id="creditos-txt">CRÉDITOS</div>
+                <div id="creditos-val">0</div>
+                <div id="modo-actual"></div>
+            </div>
+        </div>
+
+        <div id="center-panel">
+            <script>for(let i=0; i<12; i++) document.write('<div class="grid-item" id="item-'+i+'"></div>');</script>
+        </div>
+
+        <div id="right-panel">
+            <div id="video-container" onclick="minimizarSiMaximizado(event)">
+                <video id="reproductor-local" style="width:100%;height:100%;display:none;" preload="metadata"></video>
+                <div id="player"></div>
+            </div>
+            <div id="lista-espera"><ul id="lista-items"></ul></div>
+        </div>
+    </div>
+
+    <div id="teclado-virtual">
+        <div class="fila-teclado">
+            <button class="tecla-v" onclick="agregarTexto('1')">1</button><button class="tecla-v" onclick="agregarTexto('2')">2</button><button class="tecla-v" onclick="agregarTexto('3')">3</button><button class="tecla-v" onclick="agregarTexto('4')">4</button><button class="tecla-v" onclick="agregarTexto('5')">5</button><button class="tecla-v" onclick="agregarTexto('6')">6</button><button class="tecla-v" onclick="agregarTexto('7')">7</button><button class="tecla-v" onclick="agregarTexto('8')">8</button><button class="tecla-v" onclick="agregarTexto('9')">9</button><button class="tecla-v" onclick="agregarTexto('0')">0</button>
+        </div>
+        <div class="fila-teclado">
+            <button class="tecla-v" onclick="agregarTexto('Q')">Q</button><button class="tecla-v" onclick="agregarTexto('W')">W</button><button class="tecla-v" onclick="agregarTexto('E')">E</button><button class="tecla-v" onclick="agregarTexto('R')">R</button><button class="tecla-v" onclick="agregarTexto('T')">T</button><button class="tecla-v" onclick="agregarTexto('Y')">Y</button><button class="tecla-v" onclick="agregarTexto('U')">U</button><button class="tecla-v" onclick="agregarTexto('I')">I</button><button class="tecla-v" onclick="agregarTexto('O')">O</button><button class="tecla-v" onclick="agregarTexto('P')">P</button>
+        </div>
+        <div class="fila-teclado">
+            <button class="tecla-v" onclick="agregarTexto('A')">A</button><button class="tecla-v" onclick="agregarTexto('S')">S</button><button class="tecla-v" onclick="agregarTexto('D')">D</button><button class="tecla-v" onclick="agregarTexto('F')">F</button><button class="tecla-v" onclick="agregarTexto('G')">G</button><button class="tecla-v" onclick="agregarTexto('H')">H</button><button class="tecla-v" onclick="agregarTexto('J')">J</button><button class="tecla-v" onclick="agregarTexto('K')">K</button><button class="tecla-v" onclick="agregarTexto('L')">L</button><button class="tecla-v" onclick="agregarTexto('Ñ')">Ñ</button>
+        </div>
+        <div class="fila-teclado">
+            <button class="tecla-v" onclick="agregarTexto('Z')">Z</button><button class="tecla-v" onclick="agregarTexto('X')">X</button><button class="tecla-v" onclick="agregarTexto('C')">C</button><button class="tecla-v" onclick="agregarTexto('V')">V</button><button class="tecla-v" onclick="agregarTexto('B')">B</button><button class="tecla-v" onclick="agregarTexto('N')">N</button><button class="tecla-v" onclick="agregarTexto('M')">M</button><button class="tecla-v" onclick="borrarUltimo()">⌫</button><button class="tecla-v" onclick="agregarEspacio()">Espacio</button><button class="tecla-v" onclick="realizarBusqueda()">🔍</button>
+        </div>
+    </div>
+
+    <div id="modal-config" class="modal">
+        <div class="modal-contenido">
+            <h3>CONFIGURACIÓN</h3>
+            <div class="fila-mapeo">
+                <span>Clave API YouTube:</span>
+                <input type="text" id="input-api" placeholder="Ingresa clave">
+            </div>
+            <div class="fila-mapeo">
+                <span>Modo de funcionamiento:</span>
+                <select id="modoSistema">
+                    <option value="gratis">✅ Modo Gratuito</option>
+                    <option value="creditos">💰 Modo Con Créditos</option>
+                </select>
+            </div>
+            <div class="fila-mapeo" id="fila-por-moneda">
+                <span>Canciones por moneda:</span>
+                <input type="number" id="cancionesPorMoneda" min="1" value="3">
+            </div>
+            <br>
+            <button onclick="guardarConfig()">GUARDAR</button>
+        </div>
+    </div>
+
+    <div id="modal-teclas" class="modal">
+        <div class="modal-contenido">
+            <h3>MAPEO DE TECLAS</h3>
+            <p style="font-size:13px; margin-bottom:10px;">Haz clic y presiona la nueva tecla</p>
+            <div class="fila-mapeo"><span>Arriba:</span><span id="t_arriba" onclick="esperarTecla('arriba')">↑</span></div>
+            <div class="fila-mapeo"><span>Abajo:</span><span id="t_abajo" onclick="esperarTecla('abajo')">↓</span></div>
+            <div class="fila-mapeo"><span>Izquierda:</span><span id="t_izquierda" onclick="esperarTecla('izquierda')">←</span></div>
+            <div class="fila-mapeo"><span>Derecha:</span><span id="t_derecha" onclick="esperarTecla('derecha')">→</span></div>
+            <div class="fila-mapeo"><span>Aceptar:</span><span id="t_aceptar" onclick="esperarTecla('aceptar')">Enter</span></div>
+            <div class="fila-mapeo"><span>Volumen +:</span><span id="t_volmas" onclick="esperarTecla('volmas')">+</span></div>
+            <div class="fila-mapeo"><span>Volumen -:</span><span id="t_volmenos" onclick="esperarTecla('volmenos')">-</span></div>
+            <div class="fila-mapeo"><span>Pausa / Continuar:</span><span id="t_pausa" onclick="esperarTecla('pausa')">P</span></div>
+            <div class="fila-mapeo"><span>Cancelar / Siguiente:</span><span id="t_cancelar" onclick="esperarTecla('cancelar')">C</span></div>
+            <div class="fila-mapeo"><span>Buscar / Teclado:</span><span id="t_buscar" onclick="esperarTecla('buscar')">B</span></div>
+            <div class="fila-mapeo"><span>Micrófono / Voz:</span><span id="t_microfono" onclick="esperarTecla('microfono')">V</span></div>
+            <!-- ✅ OPCIÓN AGREGADA: Cambiar Género -->
+            <div class="fila-mapeo"><span>Cambiar Género:</span><span id="t_cambiargenero" onclick="esperarTecla('cambiargenero')">G</span></div>
+            <div class="fila-mapeo"><span>Monedero:</span><span id="t_monedero" onclick="esperarTecla('monedero')">M</span></div>
+            <br>
+            <button onclick="guardarTeclas()">GUARDAR TODO</button>
+        </div>
+    </div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        let player, recognition;
+        let reproductorLocal = document.getElementById('reproductor-local');
+        let API_KEY = localStorage.getItem('miApiKey') || '';
+        let creditos = 0;
+        const TIEMPO_ESPERA = 12000;
+        const MAX_DURACION_SEG = 390;
+        const RUTA_LOCAL = "C:/Musica/";
+        let temporizadorInactividad;
+        let temporizadorTeclado;
+        const filas = 3, columnas = 4;
+        let selFila = 0, selCol = 0;
+        let esperandoTecla = null;
+        let pausaManual = false;
+        let selTeclaVirtual = { f: 0, c: 0 };
+        let categoriaActual = 'Música';
+
+        // ✅ LISTA COMPLETA DE CATEGORÍAS PARA CICLO
+        const listaCategorias = ['Música', 'Karaoke', 'Videos', 'Local'];
+
+        const teclasFisicas = JSON.parse(localStorage.getItem('teclasJukebox')) || {
+            arriba:'ArrowUp', abajo:'ArrowDown', izquierda:'ArrowLeft', derecha:'ArrowRight',
+            aceptar:'Enter', volmas:'NumpadAdd', volmenos:'NumpadSubtract', pausa:'KeyP',
+            cancelar:'KeyC', buscar:'KeyB', microfono:'KeyV', cambiargenero:'KeyG', monedero:'KeyM'
+        };
+        let modoSistema = localStorage.getItem('modoSistema') || 'gratis';
+        let cancionesPorMoneda = parseInt(localStorage.getItem('cancionesPorMoneda')) || 3;
+
+        document.getElementById('input-api').value = API_KEY;
+        document.getElementById('modoSistema').value = modoSistema;
+        document.getElementById('cancionesPorMoneda').value = cancionesPorMoneda;
+        actualizarEtiquetasTeclas();
+        actualizarTextoModo();
+        actualizarBotonesCategoria();
+
+        document.getElementById('modoSistema').addEventListener('change', () => {
+            document.getElementById('fila-por-moneda').style.display = 
+                document.getElementById('modoSistema').value === 'creditos' ? 'flex' : 'none';
+        });
+        document.getElementById('modoSistema').dispatchEvent(new Event('change'));
+
+        function actualizarTextoModo() {
+            const txt = document.getElementById('modo-actual');
+            txt.textContent = modoSistema === 'gratis' ? 'MODO GRATUITO' : 'MODO CON CRÉDITOS';
+            txt.style.color = modoSistema === 'gratis' ? '#0f0' : '#ff0';
+        }
+
+        function cambiarCategoria(nombre) {
+            categoriaActual = nombre;
+            actualizarBotonesCategoria();
+            realizarBusqueda();
+        }
+
+        // ✅ FUNCIÓN PARA CAMBIAR ENTRE TODAS LAS CATEGORÍAS
+        function siguienteCategoria() {
+            const indice = listaCategorias.indexOf(categoriaActual);
+            const siguiente = (indice + 1) % listaCategorias.length;
+            cambiarCategoria(listaCategorias[siguiente]);
+        }
+
+        function actualizarBotonesCategoria() {
+            document.querySelectorAll('.btn-cat').forEach(btn => btn.classList.remove('activo'));
+            switch(categoriaActual) {
+                case 'Música': document.getElementById('cat-musica').classList.add('activo'); break;
+                case 'Karaoke': document.getElementById('cat-karaoke').classList.add('activo'); break;
+                case 'Videos': document.getElementById('cat-videos').classList.add('activo'); break;
+                case 'Local': document.getElementById('cat-local').classList.add('activo'); break;
+            }
+        }
+
+        function abrirModal(id) { document.getElementById(id).style.display='flex'; }
+        function cerrarModal(id) { document.getElementById(id).style.display='none'; esperandoTecla=null; }
+        
+        function toggleTeclado() { 
+            const el = document.getElementById('teclado-virtual'); 
+            if(el.style.display === 'block') {
+                el.style.display = 'none';
+                clearTimeout(temporizadorTeclado);
+            } else {
+                el.style.display = 'block';
+                document.getElementById('search-box').focus();
+                selTeclaVirtual = { f: 0, c: 0 };
+                marcarTeclaSeleccionada();
+                reiniciarTemporizadorTeclado();
+            }
+        }
+
+        function reiniciarTemporizadorTeclado() {
+            clearTimeout(temporizadorTeclado);
+            temporizadorTeclado = setTimeout(() => {
+                document.getElementById('teclado-virtual').style.display = 'none';
+            }, TIEMPO_ESPERA);
+        }
+
+        function agregarTexto(letra) { const inp=document.getElementById('search-box'); inp.value+=letra; inp.focus(); reiniciarTemporizadorTeclado(); }
+        function agregarEspacio() { agregarTexto(' '); }
+        function borrarUltimo() { const inp=document.getElementById('search-box'); inp.value=inp.value.slice(0,-1); inp.focus(); reiniciarTemporizadorTeclado(); }
+
+        function guardarConfig() {
+            API_KEY = document.getElementById('input-api').value.trim();
+            modoSistema = document.getElementById('modoSistema').value;
+            cancionesPorMoneda = parseInt(document.getElementById('cancionesPorMoneda').value) || 1;
+            localStorage.setItem('miApiKey', API_KEY);
+            localStorage.setItem('modoSistema', modoSistema);
+            localStorage.setItem('cancionesPorMoneda', cancionesPorMoneda);
+            actualizarTextoModo();
+            cerrarModal('modal-config');
+        }
+        function esperarTecla(que) { esperandoTecla = que; }
+        function guardarTeclas() { localStorage.setItem('teclasJukebox', JSON.stringify(teclasFisicas)); cerrarModal('modal-teclas'); }
+        function actualizarEtiquetasTeclas() {
+            Object.entries(teclasFisicas).forEach(([k,v])=>{const el=document.getElementById('t_'+k); if(el)el.textContent=v.replace('Arrow','').replace('Key','').replace('Numpad','').replace('Digit','Núm ');});
+        }
+
+        function minimizarSiMaximizado(e) {
+            if(e) { e.preventDefault(); e.stopPropagation(); }
+            const vid = document.getElementById('video-container');
+            if(vid.classList.contains('kiosk-mode')) { 
+                vid.classList.remove('kiosk-mode'); 
+                reiniciarTemporizador(); 
+            }
+        }
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '100%', width: '100%',
+                playerVars: { controls:0, rel:0, modestbranding:1, fs:0, enablejsapi:1, autoplay:0 },
+                events: { 
+                    'onStateChange': e => {
+                        if(e.data === YT.PlayerState.ENDED) { siguienteCancion(); }
+                        if(e.data === YT.PlayerState.PLAYING) { reiniciarTemporizador(); }
+                        if(e.data === YT.PlayerState.PAUSED && !pausaManual) player.playVideo();
+                    },
+                    'onError': () => { siguienteCancion(); }
+                }
+            });
+        }
+
+        async function realizarBusqueda(termino) {
+            let q = termino || document.getElementById('search-box').value.trim().toLowerCase();
+            document.querySelectorAll('.grid-item').forEach(el=>el.innerHTML='');
+
+            if(categoriaActual === 'Local') {
+                cargarArchivosLocales(q);
+                setTimeout(() => { document.getElementById('search-box').value = ''; }, 800);
+                return;
+            }
+
+            if(!q) q = categoriaActual.toLowerCase();
+            else q = `${categoriaActual} ${q}`;
+
+            if(!API_KEY) return;
+
+            try {
+                const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet,id&maxResults=25&q=${encodeURIComponent(q)}&key=${API_KEY}&type=video&videoDuration=short`);
+                const datos = await res.json();
+                if(!datos.items) return;
+
+                const ids = datos.items.map(i => i.id.videoId).join(',');
+                const durRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${ids}&key=${API_KEY}`);
+                const durData = await durRes.json();
+                const durMap = {};
+                durData.items.forEach(v => {
+                    const durISO = v.contentDetails.duration;
+                    const seg = durISO.match(/PT(\d+H)?(\d+M)?(\d+S)?/) || [];
+                    const horas = parseInt(seg[1] || '0') * 3600;
+                    const mins = parseInt(seg[2] || '0') * 60;
+                    const segs = parseInt(seg[3] || '0');
+                    durMap[v.id] = horas + mins + segs;
+                });
+
+                let mostrados = 0;
+                datos.items.forEach(item => {
+                    if(mostrados >= 12) return;
+                    const dur = durMap[item.id.videoId] || 9999;
+                    if(dur <= MAX_DURACION_SEG) {
+                        const el = document.getElementById(`item-${mostrados}`);
+                        el.innerHTML = `<img src="${item.snippet.thumbnails.high.url}"><div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.8);padding:4px;font-size:0.75em;">${item.snippet.title.substring(0,35)}...</div>`;
+                        el.dataset.tipo = 'youtube';
+                        el.dataset.id = item.id.videoId;
+                        el.dataset.titulo = item.snippet.title;
+                        el.dataset.img = item.snippet.thumbnails.default.url;
+                        el.onclick = () => agregarALista('youtube', item.id.videoId, item.snippet.title, item.snippet.thumbnails.default.url);
+                        mostrados++;
+                    }
+                });
+
+            }catch(err){ console.log('Error búsqueda:', err); }
+
+            setTimeout(() => { document.getElementById('search-box').value = ''; }, 800);
+        }
+
+        function cargarArchivosLocales(filtro = '') {
+            const archivosEjemplo = [
+                {ruta: `${RUTA_LOCAL}Intocable/Amor Maldito.mp3`, nombre: "Intocable - Amor Maldito"},
+                {ruta: `${RUTA_LOCAL}Pesado/Un Buen Perdedor.mp3`, nombre: "Pesado - Un Buen Perdedor"},
+                {ruta: `${RUTA_LOCAL}Los Invasores/Amor Chiquito.mp3`, nombre: "Los Invasores - Amor Chiquito"},
+                {ruta: `${RUTA_LOCAL}Los Invasores/Cariñito.mp3`, nombre: "Los Invasores - Cariñito"},
+                {ruta: `${RUTA_LOCAL}Varios/La Boda del Huitlacoche.mp3`, nombre: "Varios - La Boda del Huitlacoche"}
+            ];
+
+            const resultados = filtro 
+                ? archivosEjemplo.filter(a => a.nombre.toLowerCase().includes(filtro))
+                : archivosEjemplo;
+
+            if(resultados.length === 0) {
+                document.getElementById('item-0').innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#0ff;padding:8px;text-align:center;">
+                    <span>📂 Carpeta: C:\Musica</span>
+                    <small>Coloca tus archivos aquí o en subcarpetas</small>
+                    <small>Formatos: MP3, MP4, MKV, etc.</small>
+                </div>`;
+                return;
+            }
+
+            let mostrados = 0;
+            resultados.forEach(archivo => {
+                if(mostrados >= 12) return;
+                const el = document.getElementById(`item-${mostrados}`);
+                el.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#0ff;padding:8px;text-align:center;">
+                    <span>🎵</span>
+                    <span style="font-size:0.85em; margin-top:4px;">${archivo.nombre}</span>
+                    <small style="font-size:0.7em; opacity:0.7;">${archivo.ruta.replace(RUTA_LOCAL, '')}</small>
+                </div>`;
+                el.dataset.tipo = 'local';
+                el.dataset.ruta = archivo.ruta;
+                el.dataset.titulo = archivo.nombre;
+                el.onclick = () => agregarALista('local', archivo.ruta, archivo.nombre, '');
+                mostrados++;
+            });
+        }
+
+        let listaReproduccion=[];
+        function agregarALista(tipo, id, titulo, img) { 
+            if(modoSistema === 'creditos') {
+                if(creditos <= 0) {
+                    alert('⚠️ NO TIENES CRÉDITOS SUFICIENTES');
+                    return;
+                }
+                creditos--;
+                document.getElementById('creditos-val').textContent = creditos;
+            }
+
+            listaReproduccion.push({tipo, id, titulo, img}); 
+            actualizarListaUI(); 
+            if(listaReproduccion.length === 1) reproducir(0); 
+        }
+
+        function actualizarListaUI() {
+            const ul=document.getElementById('lista-items'); ul.innerHTML='';
+            listaReproduccion.forEach((v,i)=>{
+                const li=document.createElement('li');
+                li.innerHTML=`<span>${(i===0?'▶️ ':'⏭️ ')+v.titulo}</span>`;
+                li.onclick=()=>reproducirDesde(i);
+                ul.appendChild(li);
+            });
+        }
+
+        function reproducirDesde(posicion) {
+            if(posicion >= 0 && posicion < listaReproduccion.length) {
+                listaReproduccion.splice(0, posicion);
+                reproducir(0);
+            }
+        }
+
+        function reproducir(i) { 
+            if(i >= 0 && i < listaReproduccion.length) {
+                const actual = listaReproduccion[i];
+                pausaManual = false;
+                if(actual.tipo === 'youtube') {
+                    reproductorLocal.style.display = 'none';
+                    if(player && player.loadVideoById) {
+                        player.loadVideoById(actual.id);
+                        player.playVideo();
+                    }
+                } else if(actual.tipo === 'local') {
+                    if(player && player.stopVideo) player.stopVideo();
+                    reproductorLocal.style.display = 'block';
+                    reproductorLocal.src = actual.id;
+                    reproductorLocal.play().catch(e => console.log("Reproducción local:", e));
+                }
+                actualizarListaUI();
+                reiniciarTemporizador();
+            }
+        }
+
+        function siguienteCancion() {
+            listaReproduccion.shift();
+            if(listaReproduccion.length > 0) {
+                reproducir(0);
+            } else {
+                if(player) player.stopVideo();
+                reproductorLocal.pause();
+                reproductorLocal.src = '';
+                document.getElementById('video-container').classList.remove('kiosk-mode');
+                clearTimeout(temporizadorInactividad);
+            }
+        }
+
+        function actualizarSeleccion() {
+            document.querySelectorAll('.grid-item').forEach(el=>el.classList.remove('seleccionado'));
+            const idx=selFila*columnas+selCol; const elSel=document.getElementById(`item-${idx}`); if(elSel)elSel.classList.add('seleccionado');
+        }
+
+        function marcarTeclaSeleccionada() {
+            document.querySelectorAll('.tecla-v').forEach(t=>t.classList.remove('selec'));
+            const filas = document.querySelectorAll('#teclado-virtual .fila-teclado');
+            if(filas[selTeclaVirtual.f]) {
+                const teclas = filas[selTeclaVirtual.f].querySelectorAll('.tecla-v');
+                if(teclas[selTeclaVirtual.c]) teclas[selTeclaVirtual.c].classList.add('selec');
+            }
+        }
+
+        function navegarTecladoVirtual(dir) {
+            const filas = document.querySelectorAll('#teclado-virtual .fila-teclado');
+            if(!filas.length) return;
+            const totalFilas = filas.length;
+            const totalCols = filas[selTeclaVirtual.f].querySelectorAll('.tecla-v').length;
+
+            switch(dir) {
+                case 'up': selTeclaVirtual.f = Math.max(selTeclaVirtual.f - 1, 0); break;
+                case 'down': selTeclaVirtual.f = Math.min(selTeclaVirtual.f + 1, totalFilas - 1); break;
+                case 'left': selTeclaVirtual.c = Math.max(selTeclaVirtual.c - 1, 0); break;
+                case 'right': selTeclaVirtual.c = Math.min(selTeclaVirtual.c + 1, totalCols - 1); break;
+            }
+            marcarTeclaSeleccionada();
+        }
+
+        function comando(accion) {
+            minimizarSiMaximizado();
+            reiniciarTemporizador();
+            if(document.getElementById('teclado-virtual').style.display==='block') reiniciarTemporizadorTeclado();
+            
+            const tecladoVis=document.getElementById('teclado-virtual').style.display==='block';
+            if(tecladoVis){
+                switch(accion){
+                    case 'ARRIBA': navegarTecladoVirtual('up'); return;
+                    case 'ABAJO': navegarTecladoVirtual('down'); return;
+                    case 'IZQUIERDA': navegarTecladoVirtual('left'); return;
+                    case 'DERECHA': navegarTecladoVirtual('right'); return;
+                    case 'ACEPTAR': const sel=document.querySelector('.tecla-v.selec'); if(sel)sel.click(); return;
+                }
+            }
+            switch(accion){
+                case 'ARRIBA': selFila=Math.max(selFila-1,0); actualizarSeleccion(); break;
+                case 'ABAJO': selFila=Math.min(selFila+1,filas-1); actualizarSeleccion(); break;
+                case 'IZQUIERDA': selCol=Math.max(selCol-1,0); actualizarSeleccion(); break;
+                case 'DERECHA': selCol=Math.min(selCol+1,columnas-1); actualizarSeleccion(); break;
+                case 'ACEPTAR': 
+                    const idx=selFila*columnas+selCol; 
+                    const el=document.getElementById(`item-${idx}`); 
+                    if(el && el.dataset.tipo) {
+                        if(el.dataset.tipo === 'youtube') agregarALista('youtube', el.dataset.id, el.dataset.titulo, el.dataset.img);
+                        else if(el.dataset.tipo === 'local') agregarALista('local', el.dataset.ruta, el.dataset.titulo, '');
+                    }
+                    break;
+                case 'VOL+': 
+                    if(player && player.setVolume) player.setVolume(Math.min(player.getVolume()+10,100));
+                    if(reproductorLocal && !reproductorLocal.paused) reproductorLocal.volume = Math.min(reproductorLocal.volume + 0.1, 1);
+                    break;
+                case 'VOL-': 
+                    if(player && player.setVolume) player.setVolume(Math.max(player.getVolume()-10,0));
+                    if(reproductorLocal && !reproductorLocal.paused) reproductorLocal.volume = Math.max(reproductorLocal.volume - 0.1, 0);
+                    break;
+                case 'PAUSA': 
+                    pausaManual = true;
+                    if(player && player.getPlayerState() === YT.PlayerState.PLAYING) player.pauseVideo();
+                    else if(reproductorLocal && !reproductorLocal.paused) reproductorLocal.pause();
+                    else { 
+                        pausaManual = false; 
+                        if(player) player.playVideo(); 
+                        if(reproductorLocal) reproductorLocal.play(); 
+                    }
+                    break;
+                case 'CANCELAR': siguienteCancion(); break;
+                case 'BUSCAR': toggleTeclado(); break;
+                case 'MICROFONO': iniciarVoz(); break;
+                // ✅ EJECUTAR CAMBIO DE GÉNERO
+                case 'CAMBIARGENERO': siguienteCategoria(); break;
+            }
+        }
+
+        function iniciarVoz() {
+            if(!recognition){
+                recognition=new(window.SpeechRecognition||window.webkitSpeechRecognition)();
+                recognition.lang='es-MX';
+                recognition.interimResults=false;
+                recognition.onresult=e=>{
+                    const t=e.results[0][0].transcript.trim();
+                    if(t) { 
+                        document.getElementById('search-box').value = t; 
+                        realizarBusqueda(); 
+                    }
+                };
+                recognition.onerror=()=>{};
+            }
+            recognition.start();
+        }
+
+        function reiniciarTemporizador() {
+            clearTimeout(temporizadorInactividad);
+            const vid = document.getElementById('video-container');
+            vid.classList.remove('kiosk-mode');
+            const reproduciendo = (player && player.getPlayerState() === YT.PlayerState.PLAYING) || (reproductorLocal && !reproductorLocal.paused && !reproductorLocal.ended);
+            if(reproduciendo) {
+                temporizadorInactividad = setTimeout(() => {
+                    vid.classList.add('kiosk-mode');
+                }, TIEMPO_ESPERA);
+            }
+        }
+
+        function agregarCredito() { 
+            if(modoSistema === 'creditos') {
+                creditos += cancionesPorMoneda;
+                document.getElementById('creditos-val').textContent = creditos;
+                if(listaReproduccion.length > 0 && (!player || player.getPlayerState() !== YT.PlayerState.PLAYING)) {
+                    reproducir(0);
+                }
+            }
+        }
+        document.addEventListener('contextmenu',e=>{e.preventDefault();agregarCredito();});
+
+        document.addEventListener('keydown',e=>{
+            minimizarSiMaximizado();
+            if(esperandoTecla) { teclasFisicas[esperandoTecla]=e.code; actualizarEtiquetasTeclas(); esperandoTecla=null; e.preventDefault(); return; }
+
+            if(e.code.startsWith('Numpad') && !['NumpadAdd','NumpadSubtract','NumpadEnter'].includes(e.code)){
+                e.preventDefault();
+            }
+
+            if(e.code===teclasFisicas.monedero) { agregarCredito(); e.preventDefault(); }
+            if(e.code===teclasFisicas.arriba) { comando('ARRIBA'); e.preventDefault(); }
+            if(e.code===teclasFisicas.abajo) { comando('ABAJO'); e.preventDefault(); }
+            if(e.code===teclasFisicas.izquierda) { comando('IZQUIERDA'); e.preventDefault(); }
+            if(e.code===teclasFisicas.derecha) { comando('DERECHA'); e.preventDefault(); }
+            if(e.code===teclasFisicas.aceptar) { comando('ACEPTAR'); e.preventDefault(); }
+            if(e.code===teclasFisicas.volmas) { comando('VOL+'); e.preventDefault(); }
+            if(e.code===teclasFisicas.volmenos) { comando('VOL-'); e.preventDefault(); }
+            if(e.code===teclasFisicas.pausa) { comando('PAUSA'); e.preventDefault(); }
+            if(e.code===teclasFisicas.cancelar) { comando('CANCELAR'); e.preventDefault(); }
+            if(e.code===teclasFisicas.buscar) { comando('BUSCAR'); e.preventDefault(); }
+            if(e.code===teclasFisicas.microfono) { comando('MICROFONO'); e.preventDefault(); }
+            // ✅ TECLA PARA CAMBIAR GÉNERO
+            if(e.code===teclasFisicas.cambiargenero) { comando('CAMBIARGENERO'); e.preventDefault(); }
+
+            if(document.getElementById('teclado-virtual').style.display==='block') reiniciarTemporizadorTeclado();
+        });
+
+        reiniciarTemporizador();
+        actualizarSeleccion();
+    </script>
+</body>
+</html>
