@@ -64,6 +64,7 @@
         #right-panel { width: 290px; display: flex; flex-direction: column; gap: 12px; }
         #video-container { width: 100%; height: 200px; border: 2px solid #f0f; background: #000; border-radius: 10px; overflow: hidden; transition: all 0.3s ease; position: relative; z-index: 10; cursor: default !important; pointer-events: auto !important; }
         #video-container.kiosk-mode { position: fixed; top: 0; left: 0; width: 100vw !important; height: 100vh !important; z-index: 9999; border: none; border-radius: 0; cursor: default !important; }
+        #reproductor { width: 100%; height: 100%; background: #000; }
         #lista-espera { flex: 1; border: 2px solid #f0f; border-radius: 10px; padding: 10px; background: #111; overflow-y: auto; }
         #lista-items li { display:flex; align-items:center; gap:8px; padding:8px; margin:4px 0; background:#222; border-radius:5px; border-left:3px solid #0ff; cursor:pointer; font-size:0.9em; }
         #lista-items li img { width:40px; height:40px; object-fit:cover; border-radius:4px; }
@@ -131,8 +132,7 @@
 
         <div id="right-panel">
             <div id="video-container" onclick="minimizarSiMaximizado(event)">
-                <video id="reproductor-local" style="width:100%;height:100%;display:none;" preload="metadata"></video>
-                <div id="player"></div>
+                <video id="reproductor" controls="false" playsinline webkit-playsinline style="width:100%;height:100%;display:block;" preload="metadata"></video>
             </div>
             <div id="lista-espera"><ul id="lista-items"></ul></div>
         </div>
@@ -198,10 +198,8 @@
         </div>
     </div>
 
-    <script src="https://www.youtube.com/iframe_api"></script>
     <script>
-        let player, recognition;
-        let reproductorLocal = document.getElementById('reproductor-local');
+        let reproductor = document.getElementById('reproductor');
         let API_KEY = localStorage.getItem('miApiKey') || '';
         let creditos = 0;
         const TIEMPO_ESPERA = 12000;
@@ -215,6 +213,7 @@
         let pausaManual = false;
         let selTeclaVirtual = { f: 0, c: 0 };
         let categoriaActual = 'Música';
+        let recognition;
 
         const listaCategorias = ['Música', 'Karaoke', 'Videos', 'Local'];
 
@@ -320,46 +319,25 @@
             }
         }
 
-        // ✅ REPRODUCTOR MODIFICADO PARA BLOQUEAR ANUNCIOS
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('player', {
-                height: '100%', width: '100%',
-                playerVars: { 
-                    controls: 0,
-                    rel: 0,
-                    modestbranding: 1,
-                    fs: 0,
-                    enablejsapi: 1,
-                    autoplay: 0,
-                    iv_load_policy: 3,
-                    showinfo: 0,
-                    origin: window.location.origin || '*',
-                    hl: 'es',
-                    disablekb: 1
-                },
-                events: { 
-                    'onReady': () => {
-                        // Bloquear anuncios en carga
-                        if(player && player.getIframe) {
-                            const iframe = player.getIframe();
-                            iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-forms');
-                        }
-                    },
-                    'onStateChange': e => {
-                        if(e.data === YT.PlayerState.ENDED) { siguienteCancion(); }
-                        if(e.data === YT.PlayerState.PLAYING) {
-                            reiniciarTemporizador();
-                            // Quitar anuncios que aparezcan en medio
-                            setTimeout(() => {
-                                const anuncio = document.querySelector('.ytp-ad-overlay-container, .ytp-ad-player-overlay, .ytp-ad-text');
-                                if(anuncio) anuncio.remove();
-                            }, 300);
-                        }
-                        if(e.data === YT.PlayerState.PAUSED && !pausaManual) player.playVideo();
-                    },
-                    'onError': () => { siguienteCancion(); }
+        // ✅ BÚSQUEDA Y REPRODUCCIÓN SIN REPRODUCTOR OFICIAL = SIN ANUNCIOS
+        async function obtenerEnlaceDirecto(videoId) {
+            try {
+                const respuesta = await fetch(`https://invidious.jing.rocks/api/v1/videos/${videoId}?local=true`);
+                const datos = await respuesta.json();
+                if(datos.adaptiveFormats && datos.adaptiveFormats.length > 0) {
+                    const video = datos.adaptiveFormats.find(f => f.type.includes('video/mp4') && f.qualityLabel);
+                    const audio = datos.adaptiveFormats.find(f => f.type.includes('audio/mp4'));
+                    if(video && audio) return video.url;
+                    if(datos.formatStreams && datos.formatStreams.length > 0) {
+                        const formato = datos.formatStreams.find(f => f.type.includes('video/mp4'));
+                        if(formato) return formato.url;
+                    }
                 }
-            });
+                return null;
+            } catch(err) {
+                console.log('Error al obtener enlace:', err);
+                return null;
+            }
         }
 
         async function realizarBusqueda(termino) {
@@ -488,35 +466,42 @@
             }
         }
 
-        function reproducir(i) { 
+        async function reproducir(i) { 
             if(i >= 0 && i < listaReproduccion.length) {
                 const actual = listaReproduccion[i];
                 pausaManual = false;
+                reproductor.pause();
+                reproductor.src = '';
+
                 if(actual.tipo === 'youtube') {
-                    reproductorLocal.style.display = 'none';
-                    if(player && player.loadVideoById) {
-                        player.loadVideoById(actual.id);
-                        player.playVideo();
+                    const enlace = await obtenerEnlaceDirecto(actual.id);
+                    if(enlace) {
+                        reproductor.src = enlace;
+                        reproductor.play().catch(e => console.log("Error reproduciendo:", e));
+                    } else {
+                        siguienteCancion();
+                        return;
                     }
                 } else if(actual.tipo === 'local') {
-                    if(player && player.stopVideo) player.stopVideo();
-                    reproductorLocal.style.display = 'block';
-                    reproductorLocal.src = actual.id;
-                    reproductorLocal.play().catch(e => console.log("Reproducción local:", e));
+                    reproductor.src = actual.id;
+                    reproductor.play().catch(e => console.log("Reproducción local:", e));
                 }
+
                 actualizarListaUI();
                 reiniciarTemporizador();
             }
         }
+
+        reproductor.addEventListener('ended', siguienteCancion);
+        reproductor.addEventListener('error', siguienteCancion);
 
         function siguienteCancion() {
             listaReproduccion.shift();
             if(listaReproduccion.length > 0) {
                 reproducir(0);
             } else {
-                if(player) player.stopVideo();
-                reproductorLocal.pause();
-                reproductorLocal.src = '';
+                reproductor.pause();
+                reproductor.src = '';
                 document.getElementById('video-container').classList.remove('kiosk-mode');
                 clearTimeout(temporizadorInactividad);
             }
@@ -579,23 +564,12 @@
                         else if(el.dataset.tipo === 'local') agregarALista('local', el.dataset.ruta, el.dataset.titulo, '');
                     }
                     break;
-                case 'VOL+': 
-                    if(player && player.setVolume) player.setVolume(Math.min(player.getVolume()+10,100));
-                    if(reproductorLocal && !reproductorLocal.paused) reproductorLocal.volume = Math.min(reproductorLocal.volume + 0.1, 1);
-                    break;
-                case 'VOL-': 
-                    if(player && player.setVolume) player.setVolume(Math.max(player.getVolume()-10,0));
-                    if(reproductorLocal && !reproductorLocal.paused) reproductorLocal.volume = Math.max(reproductorLocal.volume - 0.1, 0);
-                    break;
+                case 'VOL+': reproductor.volume = Math.min(reproductor.volume + 0.1, 1); break;
+                case 'VOL-': reproductor.volume = Math.max(reproductor.volume - 0.1, 0); break;
                 case 'PAUSA': 
                     pausaManual = true;
-                    if(player && player.getPlayerState() === YT.PlayerState.PLAYING) player.pauseVideo();
-                    else if(reproductorLocal && !reproductorLocal.paused) reproductorLocal.pause();
-                    else { 
-                        pausaManual = false; 
-                        if(player) player.playVideo(); 
-                        if(reproductorLocal) reproductorLocal.play(); 
-                    }
+                    if(!reproductor.paused) reproductor.pause();
+                    else { pausaManual = false; reproductor.play(); }
                     break;
                 case 'CANCELAR': siguienteCancion(); break;
                 case 'BUSCAR': toggleTeclado(); break;
@@ -625,7 +599,7 @@
             clearTimeout(temporizadorInactividad);
             const vid = document.getElementById('video-container');
             vid.classList.remove('kiosk-mode');
-            const reproduciendo = (player && player.getPlayerState() === YT.PlayerState.PLAYING) || (reproductorLocal && !reproductorLocal.paused && !reproductorLocal.ended);
+            const reproduciendo = !reproductor.paused && !reproductor.ended && reproductor.src;
             if(reproduciendo) {
                 temporizadorInactividad = setTimeout(() => {
                     vid.classList.add('kiosk-mode');
@@ -637,8 +611,8 @@
             if(modoSistema === 'creditos') {
                 creditos += cancionesPorMoneda;
                 document.getElementById('creditos-val').textContent = creditos;
-                if(listaReproduccion.length > 0 && (!player || player.getPlayerState() !== YT.PlayerState.PLAYING)) {
-                    reproducir(0);
+                if(listaReproduccion.length > 0 && reproductor.paused) {
+                    reproductor.play();
                 }
             }
         }
