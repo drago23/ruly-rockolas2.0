@@ -1,6 +1,20 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <meta http-equiv="Content-Security-Policy" content="
+default-src * 'unsafe-inline' 'unsafe-eval' data: blob: filesystem:;
+script-src * 'unsafe-inline' 'unsafe-eval' https://*.youtube.com https://www.youtube.com;
+style-src * 'unsafe-inline';
+img-src * data: blob:;
+media-src * blob: https://*.youtube.com https://www.youtube.com;
+frame-src * https://*.youtube.com https://www.youtube.com https://youtube.com;
+connect-src * https://*.youtube.com https://www.googleapis.com https://youtube.com;
+object-src 'none';
+base-uri 'self';
+">
+<meta http-equiv="Access-Control-Allow-Origin" content="*">
+<meta http-equiv="Access-Control-Allow-Methods" content="GET, POST, OPTIONS">
+<meta http-equiv="Access-Control-Allow-Headers" content="*">
     <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; media-src * blob:; frame-src * https://*.youtube.com https://www.youtube.com; img-src * data: blob:; connect-src *;">
 <meta http-equiv="Access-Control-Allow-Origin" content="*">
     <meta charset="UTF-8">
