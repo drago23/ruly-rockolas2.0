@@ -319,18 +319,16 @@
             }
         }
 
-        // ✅ BÚSQUEDA Y REPRODUCCIÓN SIN REPRODUCTOR OFICIAL = SIN ANUNCIOS
         async function obtenerEnlaceDirecto(videoId) {
             try {
                 const respuesta = await fetch(`https://invidious.jing.rocks/api/v1/videos/${videoId}?local=true`);
                 const datos = await respuesta.json();
                 if(datos.adaptiveFormats && datos.adaptiveFormats.length > 0) {
-                    const video = datos.adaptiveFormats.find(f => f.type.includes('video/mp4') && f.qualityLabel);
-                    const audio = datos.adaptiveFormats.find(f => f.type.includes('audio/mp4'));
-                    if(video && audio) return video.url;
+                    const formato = datos.adaptiveFormats.find(f => f.type.includes('video/mp4') && f.qualityLabel);
+                    if(formato) return formato.url;
                     if(datos.formatStreams && datos.formatStreams.length > 0) {
-                        const formato = datos.formatStreams.find(f => f.type.includes('video/mp4'));
-                        if(formato) return formato.url;
+                        const simple = datos.formatStreams.find(f => f.type.includes('video/mp4'));
+                        if(simple) return simple.url;
                     }
                 }
                 return null;
