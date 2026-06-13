@@ -18,15 +18,10 @@
     .logo-rocola { 
     font-size: 18px; 
     text-align: center; 
-    color: #fff; /* El centro de la letra en blanco ayuda a que el neón se vea más real */
+    color: #fff; 
     font-weight: bold; 
     margin: 3px 0; 
-    /* Efecto neón rojo multicapa */
-    text-shadow: 0 0 5px #f00, 
-                 0 0 10px #f00, 
-                 0 0 20px #f00, 
-                 0 0 40px #f00, 
-                 0 0 80px #f00; 
+    text-shadow: 0 0 5px #f00, 0 0 10px #f00, 0 0 20px #f00, 0 0 40px #f00, 0 0 80px #f00; 
     animation: brilloLogo 1s infinite alternate;
 }
 
@@ -36,11 +31,11 @@
 }
 
 .logo-sub { 
-    font-size: 10px; /* Bajamos de 13px a 10px */
+    font-size: 10px; 
     text-align: center; 
     color: #88eeff; 
     font-family: 'Brush Script MT', cursive; 
-    margin-bottom: 10px; /* Reducimos este margen para acercar el logo a los botones */
+    margin-bottom: 10px; 
     animation: brilloSub 1s infinite alternate; 
 }
 
@@ -60,14 +55,12 @@
         #creditos-val { font-size: 1.3em; color: #ff0; font-weight: bold; }
         #modo-actual { font-size:0.7em; color:#ccc; margin-top:3px; }
 
-        /* ✅ Recuadros centrales recorridos a la derecha */
         #center-panel { flex: 3; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr); gap: 16px; padding: 6px; margin-left: 5px; }
         .grid-item { border: 3px solid transparent; border-radius: 10px; background: #111; cursor: pointer; position: relative; overflow: hidden; min-height: 145px; transition: 0.2s; }
         .grid-item.seleccionado { border-color: #f00; box-shadow: 0 0 12px #f00, 0 0 24px #f00; animation: destelloMarco 0.8s infinite alternate; }
         @keyframes destelloMarco { from { box-shadow: 0 0 10px #f00, 0 0 20px #f00; } to { box-shadow: 0 0 18px #f00, 0 0 35px #f00; } }
         .grid-item img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* ✅ Panel derecho reducido para mejor estética */
         #right-panel { width: 290px; display: flex; flex-direction: column; gap: 12px; }
         #video-container { width: 100%; height: 200px; border: 2px solid #f0f; background: #000; border-radius: 10px; overflow: hidden; transition: all 0.3s ease; position: relative; z-index: 10; cursor: default !important; pointer-events: auto !important; }
         #video-container.kiosk-mode { position: fixed; top: 0; left: 0; width: 100vw !important; height: 100vh !important; z-index: 9999; border: none; border-radius: 0; cursor: default !important; }
@@ -87,20 +80,9 @@
         .tecla-v:hover { background: #0ff; color: #000; }
 
         ::-webkit-scrollbar {width:8px;} ::-webkit-scrollbar-track {background:#111;} ::-webkit-scrollbar-thumb {background:#f0f;border-radius:4px;}
-    /* Estilos para los botones de la izquierda */
-        .key-ultra-small { 
-            width: 40px !important; 
-            padding: 2px 1px !important; 
-            font-size: 0.5em !important; 
-            height: 25px !important; 
-        }
-
-        /* Estilos para los botones del centro y derecha */
-        .key-small { 
-            padding: 5px 2px !important; 
-            font-size: 0.7em !important; 
-            height: 30px !important; 
-        }</style>
+        .key-ultra-small { width: 40px !important; padding: 2px 1px !important; font-size: 0.5em !important; height: 25px !important; }
+        .key-small { padding: 5px 2px !important; font-size: 0.7em !important; height: 30px !important; }
+    </style>
 </head>
 <body>
     <header>
@@ -122,19 +104,20 @@
             <div class="btn-cat" id="cat-videos" onclick="cambiarCategoria('Videos')">VIDEOS</div>
             <div class="btn-cat" id="cat-local" onclick="cambiarCategoria('Local')">LOCAL</div>
 
-         <div id="control-panel">
-    <button class="key key-ultra-small col-izq" onclick="comando('PAUSA')">PAUSA</button>
-    <button class="key key-small col-centro" onclick="comando('ARRIBA')">▲</button>
-    <button class="key key-small col-der" onclick="comando('VOL+')">VOL+</button>
+            <div id="control-panel">
+                <button class="key key-ultra-small col-izq" onclick="comando('PAUSA')">PAUSA</button>
+                <button class="key key-small col-centro" onclick="comando('ARRIBA')">▲</button>
+                <button class="key key-small col-der" onclick="comando('VOL+')">VOL+</button>
 
-    <button class="key key-ultra-small col-izq" onclick="comando('IZQUIERDA')">◀</button>
-    <button class="key key-small col-centro" onclick="comando('ACEPTAR')">OK</button>
-    <button class="key key-small col-der" onclick="comando('DERECHA')">▶</button>
+                <button class="key key-ultra-small col-izq" onclick="comando('IZQUIERDA')">◀</button>
+                <button class="key key-small col-centro" onclick="comando('ACEPTAR')">OK</button>
+                <button class="key key-small col-der" onclick="comando('DERECHA')">▶</button>
 
-    <button class="key key-ultra-small col-izq" onclick="comando('CANCELAR')">CANCELAR</button>
-    <button class="key key-small col-centro" onclick="comando('ABAJO')">▼</button>
-    <button class="key key-small col-der" onclick="comando('VOL-')">VOL-</button>
-</div>
+                <button class="key key-ultra-small col-izq" onclick="comando('CANCELAR')">CANCELAR</button>
+                <button class="key key-small col-centro" onclick="comando('ABAJO')">▼</button>
+                <button class="key key-small col-der" onclick="comando('VOL-')">VOL-</button>
+            </div>
+
             <div id="creditos-box">
                 <div id="creditos-txt">CRÉDITOS</div>
                 <div id="creditos-val">0</div>
@@ -208,7 +191,6 @@
             <div class="fila-mapeo"><span>Cancelar / Siguiente:</span><span id="t_cancelar" onclick="esperarTecla('cancelar')">C</span></div>
             <div class="fila-mapeo"><span>Buscar / Teclado:</span><span id="t_buscar" onclick="esperarTecla('buscar')">B</span></div>
             <div class="fila-mapeo"><span>Micrófono / Voz:</span><span id="t_microfono" onclick="esperarTecla('microfono')">V</span></div>
-            <!-- ✅ OPCIÓN AGREGADA: Cambiar Género -->
             <div class="fila-mapeo"><span>Cambiar Género:</span><span id="t_cambiargenero" onclick="esperarTecla('cambiargenero')">G</span></div>
             <div class="fila-mapeo"><span>Monedero:</span><span id="t_monedero" onclick="esperarTecla('monedero')">M</span></div>
             <br>
@@ -234,7 +216,6 @@
         let selTeclaVirtual = { f: 0, c: 0 };
         let categoriaActual = 'Música';
 
-        // ✅ LISTA COMPLETA DE CATEGORÍAS PARA CICLO
         const listaCategorias = ['Música', 'Karaoke', 'Videos', 'Local'];
 
         const teclasFisicas = JSON.parse(localStorage.getItem('teclasJukebox')) || {
@@ -270,7 +251,6 @@
             realizarBusqueda();
         }
 
-        // ✅ FUNCIÓN PARA CAMBIAR ENTRE TODAS LAS CATEGORÍAS
         function siguienteCategoria() {
             const indice = listaCategorias.indexOf(categoriaActual);
             const siguiente = (indice + 1) % listaCategorias.length;
@@ -340,25 +320,41 @@
             }
         }
 
+        // ✅ REPRODUCTOR MODIFICADO PARA BLOQUEAR ANUNCIOS
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
                 height: '100%', width: '100%',
                 playerVars: { 
-                    controls:0, 
-                    rel:0, 
-                    modestbranding:1, 
-                    fs:0, 
-                    enablejsapi:1, 
-                    autoplay:0,
-                    origin: 'https://drago23.github.io',
-                    adformat: 'none',
+                    controls: 0,
+                    rel: 0,
+                    modestbranding: 1,
+                    fs: 0,
+                    enablejsapi: 1,
+                    autoplay: 0,
+                    iv_load_policy: 3,
                     showinfo: 0,
-                    iv_load_policy: 3
+                    origin: window.location.origin || '*',
+                    hl: 'es',
+                    disablekb: 1
                 },
                 events: { 
+                    'onReady': () => {
+                        // Bloquear anuncios en carga
+                        if(player && player.getIframe) {
+                            const iframe = player.getIframe();
+                            iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-forms');
+                        }
+                    },
                     'onStateChange': e => {
                         if(e.data === YT.PlayerState.ENDED) { siguienteCancion(); }
-                        if(e.data === YT.PlayerState.PLAYING) { reiniciarTemporizador(); }
+                        if(e.data === YT.PlayerState.PLAYING) {
+                            reiniciarTemporizador();
+                            // Quitar anuncios que aparezcan en medio
+                            setTimeout(() => {
+                                const anuncio = document.querySelector('.ytp-ad-overlay-container, .ytp-ad-player-overlay, .ytp-ad-text');
+                                if(anuncio) anuncio.remove();
+                            }, 300);
+                        }
                         if(e.data === YT.PlayerState.PAUSED && !pausaManual) player.playVideo();
                     },
                     'onError': () => { siguienteCancion(); }
@@ -604,7 +600,6 @@
                 case 'CANCELAR': siguienteCancion(); break;
                 case 'BUSCAR': toggleTeclado(); break;
                 case 'MICROFONO': iniciarVoz(); break;
-                // ✅ EJECUTAR CAMBIO DE GÉNERO
                 case 'CAMBIARGENERO': siguienteCategoria(); break;
             }
         }
@@ -669,7 +664,6 @@
             if(e.code===teclasFisicas.cancelar) { comando('CANCELAR'); e.preventDefault(); }
             if(e.code===teclasFisicas.buscar) { comando('BUSCAR'); e.preventDefault(); }
             if(e.code===teclasFisicas.microfono) { comando('MICROFONO'); e.preventDefault(); }
-            // ✅ TECLA PARA CAMBIAR GÉNERO
             if(e.code===teclasFisicas.cambiargenero) { comando('CAMBIARGENERO'); e.preventDefault(); }
 
             if(document.getElementById('teclado-virtual').style.display==='block') reiniciarTemporizadorTeclado();
